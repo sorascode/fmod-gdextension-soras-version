@@ -227,6 +227,16 @@ void FmodServer::update() {
     callbacks_to_process.clear();
     callback_mutex->unlock();
 
+#ifdef TOOLS_ENABLED
+    if (!Engine::get_singleton()->is_editor_hint()) {
+#endif
+        // Editor only needs to run the server for events preview in the explorer.
+        //  We don't need to update performance_data and listeners
+        _set_listener_attributes();
+#ifdef TOOLS_ENABLED
+    }
+#endif
+
     Vector<OneShot*> one_shots_copy = oneShots;
     for (OneShot* oneShot : one_shots_copy) {
 
@@ -235,6 +245,18 @@ void FmodServer::update() {
             oneShots.erase(oneShot);
             delete oneShot;
             continue;
+        }
+        bool shares_space = false;
+        for (int i = 0; i < validViewportsNumber; ++i) {
+            if (validViewports[i] == oneShot->wrapper.get_node()->get_viewport()) {
+                shares_space = true;
+                break;
+            }
+        }
+        if (shares_space) {
+            oneShot->instance->set_volume(oneShot->volume);
+        } else {
+            oneShot->instance->set_volume(0.0);
         }
         oneShot->instance->set_node_attributes(oneShot->wrapper.get_node());
     }
@@ -249,7 +271,6 @@ void FmodServer::update() {
 #endif
         // Editor only needs to run the server for events preview in the explorer.
         //  We don't need to update performance_data and listeners
-        _set_listener_attributes();
         _update_performance_data();
 #ifdef TOOLS_ENABLED
     }
@@ -259,6 +280,8 @@ void FmodServer::update() {
 }
 
 void FmodServer::_set_listener_attributes() {
+    validViewportsNumber = 0;
+
     if (actualListenerNumber == 0) {
         if (listenerWarning) {
             GODOT_LOG_WARNING("FMOD Sound System: No listeners are set!")
@@ -278,6 +301,19 @@ void FmodServer::_set_listener_attributes() {
 
         Node* node {listener->wrapper.get_node()};
         if (!node->is_inside_tree()) { return; }
+
+        Viewport* viewport = node->get_viewport();
+        bool contains = false;
+        for (int j = 0; j < validViewportsNumber; ++j) {
+            if (validViewports[j] == viewport) {
+                contains = true;
+                break;
+            }
+        }
+        if (!contains) {
+            validViewports[validViewportsNumber] = viewport;
+            validViewportsNumber++;
+        }
 
         if (auto* ci {Node::cast_to<CanvasItem>(node)}) {
             FMOD_3D_ATTRIBUTES attr = get_3d_attributes_from_transform2d(ci->get_global_transform(), distanceScale);
@@ -483,6 +519,18 @@ Object* FmodServer::get_object_attached_to_listener(int index) {
         if (!node) { GODOT_LOG_WARNING("No node was set on listener") }
         return node;
     }
+}
+
+int FmodServer::get_valid_viewports_number() const {
+    return validViewportsNumber;
+}
+
+Viewport* FmodServer::get_valid_viewport(int index) const {
+    if (index < 0 || index >= systemListenerNumber) {
+        GODOT_LOG_ERROR("index of valid viewport must be set between 0 and the number of valid viewprots")
+        return nullptr;
+    }
+    return validViewports[index];
 }
 
 void FmodServer::set_software_format(const Ref<FmodSoftwareFormatSettings>& p_settings) {

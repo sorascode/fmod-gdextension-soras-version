@@ -37,6 +37,7 @@ namespace godot {
     struct OneShot {
         NodeWrapper wrapper;
         Ref<FmodEvent> instance;
+        float volume;
     };
 
     struct Listener {
@@ -96,6 +97,9 @@ namespace godot {
         int actualListenerNumber = 0;
         bool listenerWarning = true;
         Listener listeners[FMOD_MAX_LISTENERS];
+
+        int validViewportsNumber = 0;
+        Viewport* validViewports[FMOD_MAX_LISTENERS];
 
         Vector<OneShot*> oneShots;
         Vector<Ref<FmodEvent>> runningEvents;
@@ -196,6 +200,8 @@ namespace godot {
         void set_listener_lock(int index, bool isLocked);
         bool get_listener_lock(int index);
         Object* get_object_attached_to_listener(int index);
+        int get_valid_viewports_number() const;
+        Viewport* get_valid_viewport(int index) const;
 
         // BANKS
         Ref<FmodBank> load_bank(const String& pathToBank, unsigned int flag);
@@ -318,7 +324,7 @@ namespace godot {
         }
 
         if(game_obj){
-            auto* oneShot = new OneShot {NodeWrapper {game_obj}, ref};
+            auto* oneShot = new OneShot {NodeWrapper {game_obj}, ref, ref->get_volume()};
             ref->set_node_attributes(game_obj);
             oneShots.push_back(oneShot);
         }

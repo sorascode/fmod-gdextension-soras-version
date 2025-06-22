@@ -2,6 +2,21 @@
 
 using namespace godot;
 
+void FmodEventEmitter3D::update_in_valid_viewport_impl(const Ref<FmodEvent>& p_event) const {
+    bool shares_space = false;
+    for (int i = 0; i < FmodServer::get_singleton()->get_valid_viewports_number(); ++i) {
+        if (FmodServer::get_singleton()->get_valid_viewport(i) == get_viewport()) {
+            shares_space = true;
+            break;
+        }
+    }
+    if (shares_space) {
+        p_event->set_volume(get_volume());
+    } else {
+        p_event->set_volume(0.0);
+    }
+}
+
 void FmodEventEmitter3D::set_space_attribute_impl(const Ref<FmodEvent>& p_event) const {
     p_event->set_3d_attributes(get_global_transform());
 }

@@ -11,6 +11,7 @@ namespace godot {
         GDCLASS(FmodEventEmitter3D, Node3D)
 
     private:
+        void update_in_valid_viewport_impl(const Ref<FmodEvent>& p_event) const;
         void set_space_attribute_impl(const Ref<FmodEvent>& p_event) const;
         void free_impl();
 
