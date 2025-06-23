@@ -234,27 +234,27 @@ namespace godot {
         template<EventIdentifierType parameter_type>
         Ref<FmodEventDescription> fetch_event_description(const EventIdentifier& identifier);
         template<EventIdentifierType parameter_type>
-        void _play_one_shot(const EventIdentifier& identifier, Node* game_obj, const Dictionary& parameters = Dictionary());
+        Ref<FmodEvent> _play_one_shot(const EventIdentifier& identifier, Node* game_obj, const Dictionary& parameters = Dictionary());
         static void _apply_parameter_dict_to_event(const Ref<FmodEvent>& p_event, const Dictionary& parameters);
 
     public:
         template<class TParameter>
         void apply_parameter_list_to_event(const Ref<FmodEvent>& p_event, const List<TParameter>& parameters);
 
-        void play_one_shot(const String& event_name);
-        void play_one_shot_with_params(const String& event_name, const Dictionary& parameters);
-        void play_one_shot_attached(const String& event_name, Node* game_obj);
-        void play_one_shot_attached_with_params(const String& event_name, Node* game_obj, const Dictionary& parameters);
+        Ref<FmodEvent> play_one_shot(const String& event_name);
+        Ref<FmodEvent> play_one_shot_with_params(const String& event_name, const Dictionary& parameters);
+        Ref<FmodEvent> play_one_shot_attached(const String& event_name, Node* game_obj);
+        Ref<FmodEvent> play_one_shot_attached_with_params(const String& event_name, Node* game_obj, const Dictionary& parameters);
 
-        void play_one_shot_using_guid(const String& guid);
-        void play_one_shot_using_guid_with_params(const String& guid, const Dictionary& parameters);
-        void play_one_shot_using_guid_attached(const String& guid, Node* game_obj);
-        void play_one_shot_using_guid_attached_with_params(const String& guid, Node* game_obj, const Dictionary& parameters);
+        Ref<FmodEvent> play_one_shot_using_guid(const String& guid);
+        Ref<FmodEvent> play_one_shot_using_guid_with_params(const String& guid, const Dictionary& parameters);
+        Ref<FmodEvent> play_one_shot_using_guid_attached(const String& guid, Node* game_obj);
+        Ref<FmodEvent> play_one_shot_using_guid_attached_with_params(const String& guid, Node* game_obj, const Dictionary& parameters);
 
-        void play_one_shot_using_event_description(const Ref<FmodEventDescription>& event_description);
-        void play_one_shot_using_event_description_with_params(const Ref<FmodEventDescription>& event_description, const Dictionary& parameters);
-        void play_one_shot_using_event_description_attached(const Ref<FmodEventDescription>& event_description, Node* game_obj);
-        void play_one_shot_using_event_description_attached_with_params(const Ref<FmodEventDescription>& event_description, Node* game_obj, const Dictionary& parameters);
+        Ref<FmodEvent> play_one_shot_using_event_description(const Ref<FmodEventDescription>& event_description);
+        Ref<FmodEvent> play_one_shot_using_event_description_with_params(const Ref<FmodEventDescription>& event_description, const Dictionary& parameters);
+        Ref<FmodEvent> play_one_shot_using_event_description_attached(const Ref<FmodEventDescription>& event_description, Node* game_obj);
+        Ref<FmodEvent> play_one_shot_using_event_description_attached_with_params(const Ref<FmodEventDescription>& event_description, Node* game_obj, const Dictionary& parameters);
 
         void pause_all_events();
         void unpause_all_events();
@@ -302,21 +302,21 @@ namespace godot {
     }
 
     template<FmodServer::EventIdentifierType parameter_type>
-    void FmodServer::_play_one_shot(const FmodServer::EventIdentifier& identifier, Node* game_obj, const Dictionary& parameters) {
+    Ref<FmodEvent> FmodServer::_play_one_shot(const FmodServer::EventIdentifier& identifier, Node* game_obj, const Dictionary& parameters) {
         Ref<FmodEventDescription> desc =  fetch_event_description<parameter_type>(identifier);
         if (!desc->is_one_shot()){
             GODOT_LOG_WARNING(desc->get_path() + " is not a OneShot event.")
-            return;
+            return nullptr;
         }
 
         if (game_obj && !NodeWrapper::is_spatial_node(game_obj)) {
             GODOT_LOG_ERROR("Invalid Object. A Godot object bound to FMOD has to be either a Node3D or CanvasItem.")
-            return;
+            return nullptr;
         }
 
         Ref<FmodEvent> ref = _create_event_instance<parameter_type>(identifier);
 
-        if (ref.is_null()) { return; }
+        if (ref.is_null()) { return nullptr; }
 
         if (!parameters.is_empty()) {
             // set the initial parameter values
@@ -331,6 +331,8 @@ namespace godot {
 
         ref->start();
         ref->release();
+
+        return ref;
     }
 
     template<class TParameter>

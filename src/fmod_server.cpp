@@ -720,67 +720,67 @@ Ref<FmodEventDescription> FmodServer::_get_event_description(const FMOD_GUID& gu
     return cache->get_event(guid);
 }
 
-void FmodServer::play_one_shot_using_guid(const String& guid) {
+Ref<FmodEvent> FmodServer::play_one_shot_using_guid(const String& guid) {
     EventIdentifier parameter {};
     parameter.guid = string_to_fmod_guid(guid.utf8().get_data());
     return _play_one_shot<EventIdentifierType::GUID>(parameter, nullptr);
 }
 
-void FmodServer::play_one_shot(const String& event_name) {
+Ref<FmodEvent> FmodServer::play_one_shot(const String& event_name) {
     return _play_one_shot<EventIdentifierType::PATH>({event_name.utf8().get_data()}, nullptr);
 }
 
-void FmodServer::play_one_shot_using_event_description(const Ref<FmodEventDescription>& event_description) {
+Ref<FmodEvent> FmodServer::play_one_shot_using_event_description(const Ref<FmodEventDescription>& event_description) {
     EventIdentifier parameter {};
     parameter.event_description = event_description.ptr();
     return _play_one_shot<EventIdentifierType::EVENT_DESCRIPTION>(parameter, nullptr);
 }
 
-void FmodServer::play_one_shot_using_guid_with_params(const String& guid, const Dictionary& parameters) {
+Ref<FmodEvent> FmodServer::play_one_shot_using_guid_with_params(const String& guid, const Dictionary& parameters) {
     EventIdentifier parameter {};
     parameter.guid = string_to_fmod_guid(guid.utf8().get_data());
 
     return _play_one_shot<EventIdentifierType::GUID>(parameter, nullptr, parameters);
 }
 
-void FmodServer::play_one_shot_with_params(const String& event_name, const Dictionary& parameters) {
+Ref<FmodEvent> FmodServer::play_one_shot_with_params(const String& event_name, const Dictionary& parameters) {
     return _play_one_shot<EventIdentifierType::PATH>({event_name.utf8().get_data()}, nullptr, parameters);
 }
 
-void FmodServer::play_one_shot_using_event_description_with_params(const Ref<FmodEventDescription>& event_description, const Dictionary& parameters) {
+Ref<FmodEvent> FmodServer::play_one_shot_using_event_description_with_params(const Ref<FmodEventDescription>& event_description, const Dictionary& parameters) {
     EventIdentifier parameter {};
     parameter.event_description = event_description.ptr();
 
     return _play_one_shot<EventIdentifierType::EVENT_DESCRIPTION>(parameter, nullptr, parameters);
 }
 
-void FmodServer::play_one_shot_using_guid_attached(const String& guid, Node* game_obj) {
+Ref<FmodEvent> FmodServer::play_one_shot_using_guid_attached(const String& guid, Node* game_obj) {
     EventIdentifier parameter {};
     parameter.guid = string_to_fmod_guid(guid.utf8().get_data());
     return _play_one_shot<EventIdentifierType::GUID>(parameter, game_obj);
 }
 
-void FmodServer::play_one_shot_attached(const String& event_name, Node* game_obj) {
+Ref<FmodEvent> FmodServer::play_one_shot_attached(const String& event_name, Node* game_obj) {
     return _play_one_shot<EventIdentifierType::PATH>({event_name.utf8().get_data()}, game_obj);
 }
 
-void FmodServer::play_one_shot_using_event_description_attached(const Ref<FmodEventDescription>& event_description, Node* game_obj) {
+Ref<FmodEvent> FmodServer::play_one_shot_using_event_description_attached(const Ref<FmodEventDescription>& event_description, Node* game_obj) {
     EventIdentifier parameter {};
     parameter.event_description = event_description.ptr();
     return _play_one_shot<EventIdentifierType::EVENT_DESCRIPTION>(parameter, game_obj);
 }
 
-void FmodServer::play_one_shot_using_guid_attached_with_params(const String& guid, Node* game_obj, const Dictionary& parameters) {
+Ref<FmodEvent> FmodServer::play_one_shot_using_guid_attached_with_params(const String& guid, Node* game_obj, const Dictionary& parameters) {
     EventIdentifier parameter {};
     parameter.guid = string_to_fmod_guid(guid.utf8().get_data());
     return _play_one_shot<EventIdentifierType::GUID>(parameter, game_obj, parameters);
 }
 
-void FmodServer::play_one_shot_attached_with_params(const String& event_name, Node* game_obj, const Dictionary& parameters) {
+Ref<FmodEvent> FmodServer::play_one_shot_attached_with_params(const String& event_name, Node* game_obj, const Dictionary& parameters) {
     return _play_one_shot<EventIdentifierType::PATH>({event_name.utf8().get_data()}, game_obj, parameters);
 }
 
-void FmodServer::play_one_shot_using_event_description_attached_with_params(
+Ref<FmodEvent> FmodServer::play_one_shot_using_event_description_attached_with_params(
   const Ref<FmodEventDescription>& event_description,
   Node* game_obj,
   const Dictionary& parameters
