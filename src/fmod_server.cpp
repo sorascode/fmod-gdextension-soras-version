@@ -247,8 +247,9 @@ void FmodServer::update() {
             continue;
         }
         bool shares_space = false;
+        Node* node = oneShot->wrapper.get_node();
         for (int i = 0; i < validViewportsNumber; ++i) {
-            if (validViewports[i] == oneShot->wrapper.get_node()->get_viewport()) {
+            if (validViewports[i] == node->get_viewport()) {
                 shares_space = true;
                 break;
             }
@@ -257,6 +258,11 @@ void FmodServer::update() {
             oneShot->instance->set_volume(oneShot->volume);
         } else {
             oneShot->instance->set_volume(0.0);
+        }
+        if (node->can_process() and oneShot->instance->get_paused()) {
+            oneShot->instance->set_paused(false);
+        } else if (!node->can_process() and !oneShot->instance->get_paused()) {
+            oneShot->instance->set_paused(true);
         }
         oneShot->instance->set_node_attributes(oneShot->wrapper.get_node());
     }
