@@ -17,7 +17,7 @@ var bank_loader_inspector_plugin = FmodBankLoaderPropertyInspectorPlugin.new(sel
 
 
 func _init():
-    FmodBankDatabase.reload_all_banks()
+	FmodBankDatabase.reload_all_banks()
 
 	add_autoload_singleton("FmodManager", "res://addons/fmod/FmodManager.gd")
 	fmod_button = Button.new()
