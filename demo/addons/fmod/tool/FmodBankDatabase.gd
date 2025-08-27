@@ -41,3 +41,4 @@ static func reload_all_banks():
                     FmodServer.load_bank("%s/%s" % [banks_root, file_name], FmodServer.FMOD_STUDIO_LOAD_BANK_NORMAL)
                 )
             file_name = dir.get_next()
+

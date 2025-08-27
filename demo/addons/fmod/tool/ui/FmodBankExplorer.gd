@@ -77,8 +77,7 @@ func generate_tree(to_display: int, callable: Callable = Callable()):
     if _current_select_callable != Callable() && _current_select_callable.get_object() != null:
         emit_path_and_guid.disconnect(_current_select_callable)
     _current_select_callable = callable
-    
-    tree.clear()
+
     var root_item := tree.create_item()
     root_item.set_text(0, "Fmod objects")
     root_item.set_icon(0, _fmod_icon)
