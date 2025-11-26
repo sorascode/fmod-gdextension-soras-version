@@ -14,6 +14,7 @@
 #include <resources/fmod_settings.h>
 #include <resources/fmod_software_format_settings.h>
 #include <resources/fmod_sound_3d_settings.h>
+#include <resources/fmod_logging_settings.h>
 
 #include <classes/project_settings.hpp>
 
@@ -111,6 +112,27 @@ void FmodEditorPlugin::_ready() {
       FmodSound3DSettings::DEFAULT_ROLLOFF_SCALE,
       Variant::Type::FLOAT
     );
+    add_setting(
+    vformat("%s/%s/%s", FMOD_SETTINGS_BASE_PATH, FmodLoggingSettings::LOGGING_SETTINGS_BASE_PATH, FmodLoggingSettings::DEBUG_LEVEL_OPTION),
+    FmodLoggingSettings::DEFAULT_DEBUG_LEVEL,
+    Variant::Type::INT,
+    PROPERTY_HINT_ENUM,
+    "Inherit,None,Error,Warning,Log,Verbose"
+  );
+  add_setting(
+      vformat("%s/%s/%s", FMOD_SETTINGS_BASE_PATH, FmodLoggingSettings::LOGGING_SETTINGS_BASE_PATH, FmodLoggingSettings::LOG_OUTPUT_OPTION),
+      FmodLoggingSettings::DEFAULT_LOG_OUTPUT,
+      Variant::Type::INT,
+      PROPERTY_HINT_ENUM,
+      "TTY,File,Godot"
+    );
+    add_setting(
+      vformat("%s/%s/%s", FMOD_SETTINGS_BASE_PATH, FmodLoggingSettings::LOGGING_SETTINGS_BASE_PATH, FmodLoggingSettings::LOG_FILE_PATH_OPTION),
+      FmodLoggingSettings::DEFAULT_LOG_FILE_PATH,
+      Variant::Type::STRING,
+      PROPERTY_HINT_FILE,
+      "*.txt,*.log"
+    );
 }
 
 void FmodEditorPlugin::add_setting(
@@ -118,24 +140,22 @@ void FmodEditorPlugin::add_setting(
   const Variant& p_default_value,
   Variant::Type p_type,
   PropertyHint p_hint,
-  const String& p_hint_string,
-  int p_usage
+  const String& p_hint_string
 ) {
     Dictionary setting;
     setting["name"] = p_name;
     setting["type"] = p_type;
     setting["hint"] = p_hint;
     setting["hint_string"] = p_hint_string;
-    setting["usage"] = p_usage;
 
-    if (ProjectSettings::get_singleton()->has_setting(p_name))
+    if (!ProjectSettings::get_singleton()->has_setting(p_name))
     {
-        ProjectSettings::get_singleton()->add_property_info(setting);
-        return;
+        ProjectSettings::get_singleton()->set_setting(p_name, p_default_value);
     }
 
-    ProjectSettings::get_singleton()->set_setting(p_name, p_default_value);
     ProjectSettings::get_singleton()->add_property_info(setting);
+    ProjectSettings::get_singleton()->set_as_basic(p_name, true);
+    ProjectSettings::get_singleton()->set_initial_value(p_name, p_default_value);
 }
 
 void FmodEditorPlugin::_bind_methods() {}

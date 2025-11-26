@@ -1,6 +1,6 @@
 
 # Godot 4+ specific ignores
-#.godot/
+.godot/
 
 # Godot-specific ignores
 .import/
@@ -15,7 +15,6 @@ export_credentials.cfg
 data_*/
 mono_crash.*.json
 
-*.import
 .vscode/
 logs/
 **/*.aar
