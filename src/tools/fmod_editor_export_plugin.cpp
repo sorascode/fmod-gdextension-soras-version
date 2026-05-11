@@ -11,19 +11,25 @@ using namespace godot;
 
 constexpr const char* FMOD_FILE_EXTENSIONS[4] {".bank", ".ogg", ".mp3", ".wav"};
 constexpr const char* ANDROID_BUILD_DIRS[2] = { "res://android/build", "res:///android/build" };
+constexpr const char* FMOD_AUTO_EXPORT_BANKS_SETTINGS_KEY = "fmod/auto_export_banks";
 
 void FmodEditorExportPlugin::_export_begin(const PackedStringArray& features, bool is_debug, const String& path, uint32_t flags) {
-    PackedStringArray excluded_folders;
-    for (const char* dir : ANDROID_BUILD_DIRS) {
-        excluded_folders.append(dir);
-    }
-    for (const char* extension : FMOD_FILE_EXTENSIONS) {
-        PackedStringArray files;
-        list_files_in_folder(files, "res://", extension, excluded_folders);
-        for (const String& file : files) {
-            GODOT_LOG_VERBOSE(vformat("Adding %s to pck", file));
-            add_file(file, FileAccess::get_file_as_bytes(file), false);
+
+    if (get_option(FMOD_AUTO_EXPORT_BANKS_SETTINGS_KEY) != Variant(false)) {
+
+        PackedStringArray excluded_folders;
+        for (const char* dir : ANDROID_BUILD_DIRS) {
+            excluded_folders.append(dir);
         }
+        for (const char* extension : FMOD_FILE_EXTENSIONS) {
+            PackedStringArray files;
+            list_files_in_folder(files, "res://", extension, excluded_folders);
+            for (const String& file : files) {
+                GODOT_LOG_VERBOSE(vformat("Adding %s to pck", file));
+                add_file(file, FileAccess::get_file_as_bytes(file), false);
+            }
+        }
+
     }
 
     bool is_windows_export = features.has("windows");
@@ -177,10 +183,33 @@ String FmodEditorExportPlugin::_get_name() const {
     return "FmodEditorExportPlugin";
 }
 
+TypedArray<Dictionary> FmodEditorExportPlugin::_get_export_options(const Ref<EditorExportPlatform>& platform) const {
+    TypedArray<Dictionary> options;
+
+    {
+        Dictionary option_dict;
+        Dictionary option;
+        option["name"] = FMOD_AUTO_EXPORT_BANKS_SETTINGS_KEY;
+        option["type"] = Variant::BOOL;
+        
+        option_dict["option"] = option;
+        option_dict["default_value"] = true;
+        option_dict["update_visibility"] = true;
+        
+        options.append(option_dict);
+    }
+    
+    return options;
+}
+
 void FmodEditorExportPlugin::_bind_methods() {}
 
 PackedStringArray FmodEditorExportPlugin::_get_libraries_to_export(const Ref<FmodPluginsSettings>& settings, const String& p_os_name, const String& p_extension, const String& p_arch) {
     PackedStringArray result;
+
+    if (settings.is_null() || settings->get_plugins_base_path().is_empty()) {
+        return result;
+    }
 
     String plugins_libraries_path = get_plugins_os_directory(settings, p_os_name, p_arch);
     list_files_in_folder(result, plugins_libraries_path, p_extension);

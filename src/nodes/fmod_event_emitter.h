@@ -100,7 +100,8 @@ namespace godot {
         void update_in_valid_viewport(const Ref<FmodEvent>& p_event) const;
         void set_space_attribute(const Ref<FmodEvent>& p_event) const;
         void _set_parameter_value(Parameter* parameter, const Variant& p_property);
-        void apply_parameters();
+        void _apply_parameters(const Ref<FmodEvent>& p_event);
+        void _apply_parameters();
         void free();
         void _load_event_description_if_needed() const;
         void _load_event();
@@ -262,7 +263,7 @@ namespace godot {
         }
 
         event->set_volume(_volume);
-        apply_parameters();
+        _apply_parameters(event);
 
         update_in_valid_viewport(event);
         set_space_attribute(event);
@@ -424,16 +425,21 @@ namespace godot {
 #ifdef TOOLS_ENABLED
         if (!Engine::get_singleton()->is_editor_hint()) {
 #endif
-            apply_parameters();
+            _apply_parameters();
 #ifdef TOOLS_ENABLED
         }
 #endif
     }
 
     template<class Derived, class NodeType>
-    void FmodEventEmitter<Derived, NodeType>::apply_parameters() {
-        if (_event.is_null() || !_event->is_valid()) { return; }
-        FmodServer::get_singleton()->apply_parameter_list_to_event(_event, _parameters);
+    void FmodEventEmitter<Derived, NodeType>::_apply_parameters(const Ref<FmodEvent>& p_event) {
+        if (p_event.is_null() || !p_event->is_valid()) { return; }
+        FmodServer::get_singleton()->apply_parameter_list_to_event(p_event, _parameters);
+    }
+
+    template<class Derived, class NodeType>
+    void FmodEventEmitter<Derived, NodeType>::_apply_parameters() {
+        _apply_parameters(_event);
     }
 
     template<class Derived, class NodeType>
@@ -737,7 +743,9 @@ namespace godot {
         if (!parameter) { return false; }
 
         if (parts.size() == 1) {
-            r_property = _get_parameter_description(*parameter)->get_default_value();
+            Ref<FmodParameterDescription> desc {_get_parameter_description(*parameter)};
+            if (desc.is_null()) { return false; }
+            r_property = desc->get_default_value();
             return true;
         }
 
@@ -760,6 +768,10 @@ namespace godot {
             const String& parameter_name {parameter.name};
 
             Ref<FmodParameterDescription> parameter_description{_get_parameter_description(parameter) };
+            if (parameter_description.is_null()) {
+                // Skip parameters that cannot be resolved (e.g., missing or stale IDs)
+                continue;
+            }
 
             const float parameter_min_value {parameter_description->get_minimum()};
             const float parameter_max_value {parameter_description->get_maximum()};
