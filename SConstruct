@@ -91,7 +91,7 @@ elif env["platform"] == "windows":
     env.Append(LIBPATH=[env['fmod_lib_dir'] + 'windows/core/lib/' + arch_suffix_override, env['fmod_lib_dir'] + 'windows/studio/lib/' + arch_suffix_override])
     env.Append(LIBS=[libfmod, libfmodstudio])
 
-    env.Append(LINKFLAGS=["/WX"])
+    env.Append(LINKFLAGS=["-Werror"])
     if debug:
         env.Append(CCFLAGS=["/FS", "/Zi"])
 
